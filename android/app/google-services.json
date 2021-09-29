@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "665372849692",
+    "project_id": "sigadis-bekasi",
+    "storage_bucket": "sigadis-bekasi.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:665372849692:android:9c1b71a2903d8e2cae91d9",
+        "android_client_info": {
+          "package_name": "com.sigadisbekasi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "665372849692-hci885cmvcr9cj7dusaonff5b1p5eir2.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyApsdhNSDvyLxEuBxgfAxwRstRR-v_c_9o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "665372849692-hci885cmvcr9cj7dusaonff5b1p5eir2.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
