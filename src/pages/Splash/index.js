@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,15 +9,15 @@ import {
   Image,
   Animated,
 } from 'react-native';
-import {colors} from '../../utils/colors';
-import {fonts} from '../../utils/fonts';
-import {color, asin} from 'react-native-reanimated';
-import {getData, storeData} from '../../utils/localStorage';
-import {PermissionsAndroid} from 'react-native';
+import { colors } from '../../utils/colors';
+import { fonts } from '../../utils/fonts';
+import { color, asin } from 'react-native-reanimated';
+import { getData, storeData } from '../../utils/localStorage';
+import { PermissionsAndroid } from 'react-native';
 import LottieView from 'lottie-react-native';
 import axios from 'axios';
 
-export default function Splash({navigation}) {
+export default function Splash({ navigation }) {
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
   const scaleLogo = new Animated.Value(0.1);
@@ -33,7 +33,31 @@ export default function Splash({navigation}) {
     duration: 1000,
   }).start();
 
+
+  const requestCameraPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Izinkan Untuk Akses Lokasi',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === PermissionsAndroid.RESULTS.GRANTED) {
+        console.log('You can use Location');
+      } else {
+        console.log('Location permission denied');
+      }
+    } catch (err) {
+      console.warn(err);
+    }
+  };
+
+
+
   useEffect(() => {
+    requestCameraPermission();
     getDataCompany();
 
     const unsubscribe = getData('user').then(res => {

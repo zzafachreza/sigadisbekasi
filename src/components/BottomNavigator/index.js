@@ -6,10 +6,10 @@ import {
   StyleSheet,
   Dimensions,
 } from 'react-native';
-import {Icon} from 'react-native-elements';
-import {colors} from '../../utils/colors';
+import { Icon } from 'react-native-elements';
+import { colors } from '../../utils/colors';
 
-export default function BottomNavigator({state, descriptors, navigation}) {
+export default function BottomNavigator({ state, descriptors, navigation }) {
   const focusedOptions = descriptors[state.routes[state.index].key].options;
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
@@ -26,13 +26,13 @@ export default function BottomNavigator({state, descriptors, navigation}) {
         backgroundColor: colors.primary,
       }}>
       {state.routes.map((route, index) => {
-        const {options} = descriptors[route.key];
+        const { options } = descriptors[route.key];
         const label =
           options.tabBarLabel !== undefined
             ? options.tabBarLabel
             : options.title !== undefined
-            ? options.title
-            : route.name;
+              ? options.title
+              : route.name;
 
         const isFocused = state.index === index;
 
@@ -61,7 +61,7 @@ export default function BottomNavigator({state, descriptors, navigation}) {
           iconName = 'home';
         } else if (label === 'Account') {
           iconName = 'person';
-        } else if (label === 'Transaksi') {
+        } else if (label === 'History') {
           iconName = 'newspaper-outline';
         } else if (label === 'ListRedeem') {
           iconName = 'bookmarks-outline';
@@ -78,7 +78,7 @@ export default function BottomNavigator({state, descriptors, navigation}) {
             testID={options.tabBarTestID}
             onPress={onPress}
             onLongPress={onLongPress}
-            style={{flex: 1}}>
+            style={{ flex: 1 }}>
             <View
               style={{
                 color: isFocused ? colors.primary : '#919095',
@@ -126,10 +126,10 @@ export default function BottomNavigator({state, descriptors, navigation}) {
                       isFocused && iconName == 'cart'
                         ? 'cart'
                         : !isFocused && iconName == 'cart'
-                        ? 'white'
-                        : isFocused
-                        ? colors.secondary
-                        : colors.white,
+                          ? 'white'
+                          : isFocused
+                            ? colors.secondary
+                            : colors.white,
                   }}>
                   {label == 'ListRedeem' ? 'Redeem' : label}
                 </Text>

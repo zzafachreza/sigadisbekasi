@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -13,10 +13,10 @@ import {
   Linking,
   StatusBar,
 } from 'react-native';
-import {colors} from '../../utils/colors';
-import {fonts} from '../../utils/fonts';
-import {storeData, getData} from '../../utils/localStorage';
-import {Icon} from 'react-native-elements';
+import { colors } from '../../utils/colors';
+import { fonts } from '../../utils/fonts';
+import { storeData, getData } from '../../utils/localStorage';
+import { Icon } from 'react-native-elements';
 import MyCarouser from '../../components/MyCarouser';
 import MyTerbaik from '../../components/MyTerbaik';
 import axios from 'axios';
@@ -27,7 +27,7 @@ import MyTerbaik2 from '../../components/MyTerbaik2';
 import MyTerbaik3 from '../../components/MyTerbaik3';
 import MyDashboard from '../../components/MyDashboard';
 
-export default function Home({navigation}) {
+export default function Home({ navigation }) {
   const [user, setUser] = useState([]);
   const [token, setToken] = useState('');
   const [tipe, setTipe] = useState('');
@@ -106,11 +106,11 @@ export default function Home({navigation}) {
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
   const ratio = 192 / 108;
-  const _renderItem = ({item, index}) => {
+  const _renderItem = ({ item, index }) => {
     return (
       <Image
         resizeMode="contain"
-        source={{uri: item.image}}
+        source={{ uri: item.image }}
         style={{
           width: windowWidth,
           height: Math.round((windowWidth * 9) / 16),
@@ -137,14 +137,13 @@ export default function Home({navigation}) {
         <View
           style={{
             marginHorizontal: 10,
-            height: windowHeight / 9,
             padding: 10,
             // backgroundColor: colors.white,
             flexDirection: 'row',
             // borderBottomLeftRadius: 10,
             // borderBottomRightRadius: 10,
           }}>
-          <View style={{flex: 1, paddingTop: 15}}>
+          <View style={{ flex: 1, }}>
             <Text
               style={{
                 fontSize: windowWidth / 25,
@@ -168,7 +167,7 @@ export default function Home({navigation}) {
               justifyContent: 'flex-end',
               flex: 1,
             }}>
-            <TouchableOpacity
+            {/* <TouchableOpacity
               onPress={() => navigation.navigate('Wa')}
               style={{
                 padding: 10,
@@ -181,19 +180,19 @@ export default function Home({navigation}) {
                 color={colors.primary}
                 size={windowWidth / 12}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
         </View>
 
-        <View style={{padding: 10}}>
+        <View style={{ padding: 10 }}>
           <TouchableOpacity
             style={{
-              height: windowHeight / 6,
+
               backgroundColor: colors.primary,
               justifyContent: 'center',
               alignItems: 'center',
               borderRadius: 10,
-              marginVertical: 10,
+              paddingVertical: 10,
             }}>
             <Text
               style={{
@@ -201,12 +200,12 @@ export default function Home({navigation}) {
                 fontSize: windowWidth / 15,
                 color: colors.white,
               }}>
-              {tipe}
+              {tipe == "WFO" ? "WORK FROM OFFICE" : tipe == "WFH" ? "WORK FROM HOME" : "DINAS LUAR"}
             </Text>
           </TouchableOpacity>
         </View>
 
-        <MyDashboard />
+        <MyDashboard tipe={tipe == "WFO" ? "WORK FROM OFFICE" : tipe == "WFH" ? "WORK FROM HOME" : "DINAS LUAR"} />
       </ScrollView>
     </ImageBackground>
   );

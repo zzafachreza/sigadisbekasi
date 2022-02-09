@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,74 +8,108 @@ import {
   Image,
   FlatList,
 } from 'react-native';
-import {Icon} from 'react-native-elements';
-import {useNavigation} from '@react-navigation/native';
+import { Icon } from 'react-native-elements';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
-import {colors} from '../../utils/colors';
-import {fonts, windowHeight, windowWidth} from '../../utils/fonts';
+import { colors } from '../../utils/colors';
+import { fonts, windowHeight, windowWidth } from '../../utils/fonts';
 import 'intl';
 import 'intl/locale-data/jsonp/en';
-import {color} from 'react-native-elements/dist/helpers';
+import { color } from 'react-native-elements/dist/helpers';
+import { getData } from '../../utils/localStorage';
+import { useIsFocused } from "@react-navigation/native";
 
-export default function MyDashboard() {
+export default function MyDashboard({ tipe }) {
+
+  const isFocused = useIsFocused();
+
+  useEffect(() => {
+
+    if (isFocused) {
+      getData('foto_masuk').then(res => {
+        setfoto_masuk(res)
+      })
+
+
+      getData('foto_pulang').then(res => {
+        console.log('foto pulang', res)
+        setfoto_pulang(res)
+      })
+    }
+
+  }, [isFocused])
+
   const navigation = useNavigation();
-  const [data, setData] = useState([
-    {
-      nama: 'ABSEN MASUK',
-      nav: 'Masuk',
-      foto: 'https://images.unsplash.com/photo-1551650992-ee4fd47df41f?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1180&q=80',
-    },
-    {
-      nama: 'ABSEN KELUAR',
-      nav: 'Keluar',
-      foto: 'https://images.unsplash.com/photo-1509395286499-2d94a9e0c814?ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&ixlib=rb-1.2.1&auto=format&fit=crop&w=1180&q=80',
-    },
-  ]);
 
-  const renderItem = ({item}) => {
-    return (
-      <TouchableOpacity
-        style={styles.card}
-        onPress={() => navigation.navigate(item.nav)}
-        activeOpacity={1.0}>
-        <Image style={styles.image} source={{uri: item.foto}} />
-        <View
-          style={{
-            top: 0,
-            paddingLeft: 10,
-            paddingRight: 10,
-            position: 'absolute',
-            backgroundColor: colors.primary,
-            borderBottomRightRadius: 10,
-            borderBottomWidth: 5,
-            borderBottomColor: colors.secondary,
-          }}>
-          <Text
-            style={{
-              fontFamily: fonts.secondary[600],
-              color: colors.white,
-              fontSize: windowWidth / 23,
-            }}>
-            {item.nama}
-          </Text>
-        </View>
-      </TouchableOpacity>
-    );
-  };
+  const [foto_masuk, setfoto_masuk] = useState('https://zavalabs.com/nogambar.jpg');
+  const [foto_pulang, setfoto_pulang] = useState('https://zavalabs.com/nogambar.jpg');
+
+
 
   return (
     <View>
       <View
         style={{
           flex: 1,
+
         }}>
-        <View style={{padding: 10}}>
-          <FlatList
-            numColumns={2}
-            data={data}
-            renderItem={renderItem}
-            keyExtractor={item => item.id}
-          />
+        <View style={{ padding: 10, flexDirection: 'row' }}>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate('Masuk', {
+              tipe: tipe
+            })}
+            activeOpacity={1.0}>
+            <Image style={styles.image} source={{ uri: foto_masuk == null ? 'https://zavalabs.com/nogambar.jpg' : foto_masuk }} />
+            <View
+              style={{
+                top: 0,
+                paddingLeft: 10,
+                paddingRight: 10,
+                position: 'absolute',
+                backgroundColor: colors.primary,
+                borderBottomRightRadius: 10,
+                borderBottomWidth: 5,
+                borderBottomColor: colors.secondary,
+              }}>
+              <Text
+                style={{
+                  fontFamily: fonts.secondary[600],
+                  color: colors.white,
+                  fontSize: windowWidth / 23,
+                }}>
+                ABSEN MASUK
+              </Text>
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.card}
+            onPress={() => navigation.navigate('Keluar', {
+              tipe: tipe
+            })}
+            activeOpacity={1.0}>
+            <Image style={styles.image} source={{ uri: foto_pulang == null ? 'https://zavalabs.com/nogambar.jpg' : foto_pulang }} />
+            <View
+              style={{
+                top: 0,
+                paddingLeft: 10,
+                paddingRight: 10,
+                position: 'absolute',
+                backgroundColor: colors.primary,
+                borderBottomRightRadius: 10,
+                borderBottomWidth: 5,
+                borderBottomColor: colors.secondary,
+              }}>
+              <Text
+                style={{
+                  fontFamily: fonts.secondary[600],
+                  color: colors.white,
+                  fontSize: windowWidth / 23,
+                }}>
+                ABSEN PULANG
+              </Text>
+            </View>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -87,9 +121,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
   },
   card: {
-    height: 150,
+    flex: 1,
     margin: 5,
-    width: '100%',
+    height: 200,
     shadowColor: colors.primary,
     shadowColor: '#000',
     shadowOffset: {
@@ -104,11 +138,12 @@ const styles = StyleSheet.create({
     // backgroundColor: colors.success,
     marginBottom: 10,
     justifyContent: 'center',
-    flex: 1,
+
+
   },
   image: {
-    height: 150,
-    width: '100%',
+    height: 400,
+    resizeMode: 'contain',
   },
   detailsContainer: {
     padding: 10,

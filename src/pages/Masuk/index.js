@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -10,24 +10,24 @@ import {
   Dimensions,
   SafeAreaView,
 } from 'react-native';
-import {colors} from '../../utils/colors';
-import {fonts} from '../../utils/fonts';
-import {MyInput, MyGap, MyButton} from '../../components';
+import { colors } from '../../utils/colors';
+import { fonts } from '../../utils/fonts';
+import { MyInput, MyGap, MyButton } from '../../components';
 import axios from 'axios';
 import LottieView from 'lottie-react-native';
-import {getData, storeData} from '../../utils/localStorage';
-import {launchCamera, launchImageLibrary} from 'react-native-image-picker';
-import {showMessage} from 'react-native-flash-message';
-
-export default function Masuk({navigation, route}) {
-  navigation.setOptions({
-    title: 'Edit Profile',
-  });
-
+import { getData, storeData } from '../../utils/localStorage';
+import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import { showMessage } from 'react-native-flash-message';
+import GetLocation from 'react-native-get-location';
+import { getDistance, convertDistance } from 'geolib';
+export default function Masuk({ navigation, route }) {
+  const items = route.params;
+  // console.log('hasil sebelumya', items);
   const windowWidth = Dimensions.get('window').width;
   const windowHeight = Dimensions.get('window').height;
-  const [loading, setLoading] = useState(false);
-  const [tipe, setTipe] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [latitude, setLatitude] = useState('');
+  const [longitude, setLongitude] = useState('');
   const [data, setData] = useState({
     nama_lengkap: null,
     email: null,
@@ -36,9 +36,19 @@ export default function Masuk({navigation, route}) {
     alamat: null,
   });
 
+  const [jarak, setJarak] = useState(0);
+  const [toleransi, setToleransi] = useState(0);
+  const [kirim, setKirim] = useState({
+    foto: null,
+    jenis: 'MASUK',
+    tipe: route.params.tipe,
+  });
+
   const options = {
     includeBase64: true,
-    quality: 0.3,
+    quality: 0.5,
+    maxWidth: 300,
+    maxHeight: 300,
   };
 
   const getCamera = xyz => {
@@ -49,11 +59,16 @@ export default function Masuk({navigation, route}) {
       } else if (response.error) {
         console.log('Image Picker Error: ', response.error);
       } else {
-        let source = {uri: response.uri};
+        let source = { uri: response.uri };
         switch (xyz) {
           case 1:
             setData({
               ...data,
+              foto: `data:${response.type};base64, ${response.base64}`,
+            });
+            storeData('foto_masuk', `data:${response.type};base64, ${response.base64}`);
+            setKirim({
+              ...kirim,
               foto: `data:${response.type};base64, ${response.base64}`,
             });
             break;
@@ -62,50 +77,82 @@ export default function Masuk({navigation, route}) {
     });
   };
 
-  const getGallery = xyz => {
-    launchImageLibrary(options, response => {
-      console.log('All Response = ', response);
-
-      console.log('Ukuran = ', response.fileSize);
-      if (response.didCancel) {
-        console.log('User cancelled image picker');
-      } else if (response.error) {
-        console.log('Image Picker Error: ', response.error);
-      } else {
-        if (response.fileSize <= 200000) {
-          let source = {uri: response.uri};
-          switch (xyz) {
-            case 1:
-              setData({
-                ...data,
-                foto: `data:${response.type};base64, ${response.base64}`,
-              });
-              break;
-          }
-        } else {
-          showMessage({
-            message: 'Ukuran Foto Terlalu Besar Max 500 KB',
-            type: 'danger',
-          });
-        }
-      }
-    });
-  };
-
   useEffect(() => {
-    getData('tipe').then(res => {
-      setTipe(res);
-    });
+
+    // axios
+    //   .get('https://zavalabs.com/sigadisbekasi/api/company.php')
+    //   .then(tol => {
+    //     console.log('toleransi jarak', tol.data.toleransi)
+    //     setToleransi(tol.data.toleransi);
+    //   });
+
+
+
     getData('user').then(res => {
       setData(res);
+      setToleransi(res.max_jarak);
       console.log(res);
+      GetLocation.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+      })
+        .then(location => {
+          console.log(location);
+          setLatitude(location.latitude);
+
+          setLongitude(location.longitude);
+          setLoading(false);
+          setKirim({
+            ...kirim,
+            ref_member: res.id,
+            latitude: location.latitude,
+            longitude: location.longitude,
+          });
+
+          const ProsesJarak = getDistance(
+            { latitude: res.latitude, longitude: res.longitude },
+            { latitude: location.latitude, longitude: location.longitude },
+
+            1,
+          );
+          setJarak(ProsesJarak);
+          console.error('jarak', ProsesJarak)
+
+
+        })
+        .catch(error => {
+          setLoading(false);
+          const { code, message } = error;
+          console.warn(code, message);
+        });
     });
-    console.log('test edit');
   }, []);
 
   const simpan = () => {
-    setLoading(true);
-    console.log('kirim edit', data);
+
+
+    if (kirim.foto == null) {
+      alert('Foto Masih kosong, silahkan untuk selfie !');
+    } else if (jarak >= toleransi && route.params.tipe == 'WORK FROM OFFICE') {
+
+      alert('Maaf jarak toleransi Anda tidak sesuai, maksimal ' + toleransi + ' Meter dari titik ');
+    }
+    else {
+      setLoading(true);
+
+
+      axios
+        .post('https://zavalabs.com/sigadisbekasi/api/absen_add.php', kirim)
+        .then(x => {
+          setLoading(false);
+          alert('Absensi Masuk Berhasil Di Kirim');
+          console.log('respose server', x);
+          navigation.navigate('MainApp');
+        });
+    }
+
+
+
   };
   return (
     <SafeAreaView style={styles.page}>
@@ -113,28 +160,70 @@ export default function Masuk({navigation, route}) {
         source={require('../../assets/logooren.png')}
         style={styles.image}
       /> */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+        <View>
+          <Text
+            style={{
+              fontFamily: fonts.secondary[600],
+              color: colors.black,
+              fontSize: windowWidth / 20,
+            }}>
+            Latitude
+          </Text>
+          <Text
+            style={{
+              fontFamily: fonts.secondary[400],
+              color: colors.primary,
+              fontSize: windowWidth / 30,
+            }}>
+            {latitude}
+          </Text>
+          {/* <Text>{data.latitude}</Text> */}
+        </View>
+        <View>
+          <Text
+            style={{
+              fontFamily: fonts.secondary[600],
+              color: colors.black,
+              fontSize: windowWidth / 20,
+            }}>
+            Longitude
+          </Text>
+          <Text
+            style={{
+              fontFamily: fonts.secondary[400],
+              color: colors.primary,
+              fontSize: windowWidth / 30,
+            }}>
+            {longitude}
+          </Text>
+
+        </View>
+
+
+      </View>
       <View
         style={{
           flex: 1,
           justifyContent: 'center',
           alignItems: 'center',
         }}>
+
+
+
+
+
+
         <Text
           style={{
             fontFamily: fonts.secondary[600],
-            fontSize: windowWidth / 15,
-            marginBottom: 5,
-          }}>
-          ABSEN MASUK
-        </Text>
-        <Text
-          style={{
-            fontFamily: fonts.secondary[400],
             fontSize: windowWidth / 20,
             marginBottom: 5,
           }}>
-          {tipe}
+          ABSEN MASUK {route.params.tipe}
         </Text>
+
+
 
         <View>
           <View
@@ -150,11 +239,11 @@ export default function Masuk({navigation, route}) {
             <Image
               source={{
                 uri:
-                  data.foto == ''
+                  data.foto == null
                     ? 'https://zavalabs.com/nogambar.jpg'
                     : data.foto,
               }}
-              style={{width: 300, height: 400}}
+              style={{ width: 300, height: 400 }}
             />
           </View>
           <MyGap jarak={10} />
@@ -167,17 +256,25 @@ export default function Masuk({navigation, route}) {
             onPress={() => getCamera(1)}
           />
         </View>
+
+        <Text
+          style={{
+            fontFamily: fonts.secondary[600],
+            fontSize: windowWidth / 23,
+            color: colors.black
+          }}>{jarak} Meter Dari Tempat Kerja</Text>
       </View>
 
-      <MyGap jarak={20} />
+
       <MyButton
-        title="SIMPAN"
+        title="MASUK SEKARANG"
         Icons="cloud-upload-outline"
         warna={colors.primary}
         iconColor={colors.white}
         colorText={colors.white}
         onPress={simpan}
       />
+
 
       {loading && (
         <LottieView
